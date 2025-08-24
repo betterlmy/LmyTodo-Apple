@@ -111,7 +111,3 @@ LmyTodoList/
 - HTTP状态码错误
 - API业务错误
 - 数据解析错误
-
-## 许可证
-
-MIT License
