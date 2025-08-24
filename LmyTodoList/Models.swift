@@ -39,7 +39,16 @@ struct LoginRequest: Codable {
 }
 
 /**
- 登录响应模型
+ 登录响应数据
+ - 实际的登录数据，包含token和用户信息
+ */
+struct LoginData: Codable {
+    let token: String    // JWT认证令牌
+    let user: User       // 用户信息
+}
+
+/**
+ 登录响应模型（旧版本，保持兼容）
  - 包含JWT token和用户信息
  */
 struct LoginResponse: Codable {
@@ -53,6 +62,43 @@ struct LoginResponse: Codable {
  */
 struct MessageResponse: Codable {
     let message: String
+}
+
+// MARK: - 后端统一响应格式
+
+/**
+ 后端统一成功响应格式
+ - 包装实际数据
+ */
+struct ApiSuccessResponse<T: Codable>: Codable {
+    let code: Int
+    let message: String
+    let data: T
+}
+
+/**
+ 后端统一错误响应格式
+ */
+struct ApiErrorResponse: Codable {
+    let code: Int
+    let message: String
+    let data: String?  // 错误详情，可能为空
+}
+
+/**
+ 简单成功响应（无具体数据）
+ */
+struct SimpleSuccessResponse: Codable {
+    let code: Int
+    let message: String
+    let data: EmptyData?
+}
+
+/**
+ 空数据结构
+ */
+struct EmptyData: Codable {
+    // 空结构体，用于没有具体数据的成功响应
 }
 
 // MARK: - TODO相关数据模型
@@ -100,4 +146,23 @@ struct UpdateTodoRequest: Codable {
     let title: String?       // 可选字段
     let description: String? // 可选字段
     let completed: Bool?     // 可选字段
+}
+
+/**
+ 更新TODO请求模型（包含ID）
+ - 根据swagger文档，PUT请求需要在body中包含id
+ */
+struct UpdateTodoRequestWithId: Codable {
+    let id: Int              // 必填字段
+    let title: String?       // 可选字段
+    let description: String? // 可选字段
+    let completed: Bool?     // 可选字段
+}
+
+/**
+ 删除TODO请求模型
+ - 根据swagger文档，DELETE请求需要在body中包含id
+ */
+struct DeleteTodoRequest: Codable {
+    let id: Int              // 必填字段
 }

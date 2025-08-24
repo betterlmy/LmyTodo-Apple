@@ -119,7 +119,7 @@ class AuthManager: ObservableObject {
                     }
                 },
                 receiveValue: { [weak self] response in
-                    print("注册成功: \(response.message)") // 调试日志
+                    print("注册成功响应: \(response)") // 调试日志
                     // 注册成功，设置成功消息并清除错误信息
                     self?.registerSuccessMessage = "注册成功！请使用您的账号登录。"
                     self?.errorMessage = nil
@@ -146,16 +146,38 @@ class AuthManager: ObservableObject {
                     case .finished:
                         print("登录请求完成") // 调试日志
                     case .failure(let error):
-                        print("登录失败: \(error.localizedDescription)") // 调试日志
-                        self?.errorMessage = error.localizedDescription
+                        print("❌ 登录失败详情: \(error)")
+                        print("❌ 错误类型: \(type(of: error))")
+                        print("❌ 错误描述: \(error.localizedDescription)")
+                        
+                        // 检查是否是网络错误
+                        if let networkError = error as? NetworkError {
+                            print("❌ 网络错误枚举: \(networkError)")
+                            print("❌ 网络错误localizedDescription: \(networkError.localizedDescription)")
+                            print("❌ 网络错误errorDescription: \(networkError.errorDescription ?? "nil")")
+                        }
+                        
+                        // 优先使用 errorDescription (LocalizedError 协议)
+                        let errorMsg: String
+                        if let localizedError = error as? LocalizedError,
+                           let errorDescription = localizedError.errorDescription {
+                            errorMsg = errorDescription
+                            print("✅ 使用 LocalizedError.errorDescription: '\(errorMsg)'")
+                        } else {
+                            errorMsg = error.localizedDescription
+                            print("⚠️ 使用标准 localizedDescription: '\(errorMsg)'")
+                        }
+                        
+                        print("❌ 即将设置给UI的错误信息: '\(errorMsg)'")
+                        self?.errorMessage = errorMsg
                         self?.isLoggedIn = false // 确保登录状态为false
                     }
                 },
-                receiveValue: { [weak self] response in
-                    print("登录成功，用户: \(response.user.username)") // 调试日志
+                receiveValue: { [weak self] loginData in
+                    print("登录成功，用户: \(loginData.user.username)") // 调试日志
                     // 登录成功处理
-                    UserDefaults.standard.set(response.token, forKey: "jwt_token")  // 保存token
-                    self?.currentUser = response.user     // 设置当前用户
+                    UserDefaults.standard.set(loginData.token, forKey: "jwt_token")  // 保存token
+                    self?.currentUser = loginData.user     // 设置当前用户
                     self?.isLoggedIn = true              // 更新登录状态
                     self?.errorMessage = nil             // 清除错误信息
                 }

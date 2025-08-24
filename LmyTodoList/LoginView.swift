@@ -105,7 +105,11 @@ struct LoginView: View {
              - oldValue, newValue: 旧值和新值参数
              */
             .onChange(of: authManager.errorMessage) { _, errorMessage in
+                print("🔍 LoginView收到错误信息变化: '\(errorMessage ?? "nil")'")
                 showingAlert = errorMessage != nil  // 有错误时显示弹窗
+                if showingAlert {
+                    print("🔍 将要显示错误弹窗，内容: '\(errorMessage ?? "")'")
+                }
             }
             
             // MARK: - 注册成功处理
